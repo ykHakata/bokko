@@ -1,0 +1,139 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use utf8;
+use Time::Piece;
+use Time::Seconds;
+binmode STDOUT, ':encoding(UTF-8)';
+
+my $conf = +{
+    start_date => shift @ARGV,
+    caps       => [qw{(日) (月) (火) (水) (木) (金) (土)}],
+};
+
+my $daily_report = __PACKAGE__->new($conf);
+$daily_report->set_tp_obj;
+$daily_report->set_caps;
+$daily_report->one_month_report;
+$daily_report->render;
+
+sub new {
+    my $class = shift;
+    my $self  = shift;
+    if ( !ref $self ) {
+        $self = +{};
+    }
+    return bless $self, $class;
+}
+
+sub set_render_text {
+    my $self  = shift;
+    my $value = shift;
+    $self->{render_text} = $value;
+    return $self;
+}
+
+sub get_render_text {
+    my $self = shift;
+    return $self->{render_text};
+}
+
+sub get_start_date {
+    my $self = shift;
+    return $self->{start_date};
+}
+
+sub get_caps {
+    my $self = shift;
+    return $self->{caps};
+}
+
+sub set_caps {
+    my $self = shift;
+    my $caps = $self->get_caps;
+    if ($caps) {
+        $self->{tp_obj}->day_list( @{$caps} );
+        return $self;
+    }
+    return $self;
+}
+
+sub set_tp_obj {
+    my $self = shift;
+    my $date = $self->get_start_date;
+    my $t    = localtime;
+    if ($date) {
+        $self->{tp_obj} = $t->strptime( $date, '%Y-%m-%d' );
+        return $self;
+    }
+
+    # 日時指定がない場合常に月の先頭から開始する
+    $date = $t->strftime('%Y-%m') . '-01';
+    $self->{tp_obj} = $t->strptime( $date, '%Y-%m-%d' );
+    return $self;
+}
+
+sub get_tp_obj {
+    my $self = shift;
+    return $self->{tp_obj};
+}
+
+sub one_month_report {
+    my $self      = shift;
+    my $tp        = $self->get_tp_obj;
+    my $start_day = $tp->mday;
+    my $last_day  = $tp->month_last_day;
+    my $daily;
+    for my $day ( $start_day .. $last_day ) {
+        $self->set_template($tp);
+        $daily .= $self->get_render_text;
+        $tp = $tp + ONE_DAY;
+    }
+    $self->set_render_text($daily);
+    return $self;
+}
+
+sub set_template {
+    my $self = shift;
+    my $tp   = shift;
+
+    my $date     = $tp->date;
+    my $wdayname = $tp->wdayname;
+    my $format   = qq{
+## $date $wdayname
+
+<!-- SPLIT -->
+
+作業記録
+
+* 勤務時間: 実働(h)
+
+    00:00-00:00 (h)
+
+* 作業内容:
+    プロジェクト:
+
+    チケット:
+
+* 明日以降の進捗予定:
+
+* 気になる点等（アドバイスほしい点など）
+
+<!-- SPLIT -->
+
+<!-- SPLIT DATE -->
+};
+    my $text = $format;
+    $self->set_render_text($text);
+    return $self;
+}
+
+sub render {
+    my $self = shift;
+    print $self->get_render_text;
+    return;
+}
+
+__END__
+
+特に指定がなければ実行させた今の日付から自動的に日報の日付を取得したい

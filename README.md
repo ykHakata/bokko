@@ -17,4 +17,6 @@
 
 # CONTENTS
 
-DateMemo - 日報のひな形を出力する
+- [dayrepo](daily_report/README.md) - daily report 日報のひな形出力
+- [DateMemo](DateMemo/README.md) - 日報のひな形を出力する
+- [uniq_history](uniq_history/README.md) - uniqhistory - `.bash_history` の重複行を削除し、作り変える

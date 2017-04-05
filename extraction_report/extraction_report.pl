@@ -17,7 +17,18 @@ my $text = do { local $/; <$fh> };
 my $summary = '';
 for my $date ( split '<!-- SPLIT DATE -->', $text ) {
     my ( $title, $report, $memo, ) = split '<!-- SPLIT -->', $date;
-    $summary .= $title . $report;
+
+    if ( $title && $report ) {
+        $summary .= $title . $report;
+    }
+
+    if ( !$title && $report) {
+        $summary .=  $report;
+    }
+
+    if ( $title && !$report) {
+        $summary .=  $title;
+    }
 }
 
 $fh->close;

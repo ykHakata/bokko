@@ -20,4 +20,5 @@
 - [dayrepo](daily_report/) - daily report 日報のひな形出力
 - [DateMemo](DateMemo/) - 日報のひな形を出力する
 - [extraction_report](extraction_report/) - extraction_report
+- [make_chapter](make_chapter/) - makechapter - 章立ての記事を書くためのディレクトリ構造の構築
 - [uniq_history](uniq_history/) - uniqhistory - `.bash_history` の重複行を削除し、作り変える

@@ -63,13 +63,29 @@ $ chmod a+x makechapter
 (started_docker という名前のリポジトリ管理前提のディレクトリ構造をつくりたい)
 $ export CREATE_DIR="$(pwd)/started_docker" && makechapter
 
-(.org はオリジナルのコピー、 .sort は並び替えたもののコピーができる)
-$ ls -al ~
-...
--rw-------    1 yk    staff   48721  1  5 22:10 .bash_history
--rw-r--r--    1 yk    staff  268306  1  5 22:10 .bash_history.org
--rw-r--r--    1 yk    staff  268306  1  5 22:10 .bash_history.sort
-...
+$ tree started_docker/
+started_docker/
+├── README.md
+├── chapter1
+│   └── README.md
+├── chapter2
+│   └── README.md
+├── chapter3
+│   └── README.md
+├── chapter4
+│   └── README.md
+├── chapter5
+│   └── README.md
+├── chapter6
+│   └── README.md
+├── chapter7
+│   └── README.md
+├── chapter8
+│   └── README.md
+└── chapter9
+    └── README.md
+
+9 directories, 10 files
 ```
 
 # SEE ALSO

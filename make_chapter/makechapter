@@ -1,0 +1,40 @@
+#!/bin/bash
+##############################################################################
+# Name: makechapter
+# Description: 章立ての記事を書く時のディレクトリ構造
+# Usage: export CREATE_DIR="$(pwd)/started_docker" && makechapter
+# Author: yukio kusakabe
+# Date: 2020-01-24
+##############################################################################
+
+mkdir ${CREATE_DIR}
+readme="${CREATE_DIR}/README.md"
+touch ${readme}
+echo '# NAME' >> ${readme}
+echo '' >> ${readme}
+echo '# INTRODUCTION' >> ${readme}
+echo '' >> ${readme}
+echo '# MENU' >> ${readme}
+echo '' >> ${readme}
+for i in {1..9}
+do
+  echo "- [CHAPTER${i}](/chapter${i}):" >> ${readme}
+  mkdir "${CREATE_DIR}/chapter${i}"
+  readmefile="${CREATE_DIR}/chapter${i}/README.md"
+  touch ${readmefile}
+  echo '# NAME' >> ${readmefile}
+  echo '' >> ${readmefile}
+  echo "chapter${i} -" >> ${readmefile}
+  echo '' >> ${readmefile}
+  echo '## SECTION1' >> ${readmefile}
+  echo '' >> ${readmefile}
+  echo '## SECTION2' >> ${readmefile}
+  echo '' >> ${readmefile}
+  echo '## SECTION3' >> ${readmefile}
+  echo '' >> ${readmefile}
+  echo '# SUMMARY' >> ${readmefile}
+  echo '' >> ${readmefile}
+  echo '# SEE ALSO' >> ${readmefile}
+done
+echo '' >> ${readme}
+echo '# SEE ALSO' >> ${readme}

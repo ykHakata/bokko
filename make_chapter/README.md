@@ -2,6 +2,10 @@
 
 makechapter - 章立ての記事を書くためのディレクトリ構造の構築
 
+# MEMO
+
+2020/08/13: こちらまだ作成中、時を見てまとめる
+
 # SYNOPSIS
 
 ```
@@ -44,7 +48,7 @@ $ ln -s ~/github/bokko/make_chapter/makechapter ~/bin/makechapter
 $ which makechapter
 /Users/yk/bin/makechapter
 
-(実行権限を確認していおく)
+(実行権限を確認しておく)
 $ ls -al
 ...
 lrwxr-xr-x   1 yk  staff       47  1 24 15:31 makechapter -> /Users/yk/github/bokko/make_chapter/makechapter

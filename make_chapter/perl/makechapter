@@ -1,0 +1,228 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use utf8;
+use IO::File;
+use File::Basename;
+use Getopt::Long;
+use Data::Dumper;
+my $project    = "project";
+my $chapter    = 5;
+my $section    = 3;
+my $subsection = 3;
+GetOptions(
+    "project=s"    => \$project,
+    "chapter=i"    => \$chapter,
+    "section=i"    => \$section,
+    "subsection=i" => \$subsection,
+) or die("Error in command line arguments\n");
+
+my @c_numbers   = ( 1 .. $chapter );
+my @s_numbers   = ( 1 .. $section );
+my @sub_numbers = ( 1 .. $subsection );
+
+# project
+mkdir $project;
+
+# chapter
+my $chapter_dirs = create_dir( $project, 'chapter', \@c_numbers, );
+for my $chapter_dir ( @{$chapter_dirs} ) {
+    create_readme( $chapter_dir, basename($chapter_dir),
+        [ map { 'SECTION' . $_ } @s_numbers ] );
+}
+
+# section
+my $section_dirs = [];
+for my $chapter_dir ( @{$chapter_dirs} ) {
+    my $dirs = create_dir( $chapter_dir, 'section', \@s_numbers, );
+    push @{$section_dirs}, @{$dirs};
+}
+for my $section_dir ( @{$section_dirs} ) {
+    create_readme( $section_dir, basename($section_dir),
+        [ map { 'SUBSECTION' . $_ } @sub_numbers ] );
+}
+
+# subsection
+my $subsection_dirs = [];
+for my $section_dir ( @{$section_dirs} ) {
+    my $dirs = create_dir( $section_dir, 'subsection', \@sub_numbers, );
+    push @{$subsection_dirs}, @{$dirs};
+}
+for my $subsection_dir ( @{$subsection_dirs} ) {
+    create_readme( $subsection_dir, basename($subsection_dir), [] );
+}
+
+my $hash = +{
+    CHAPTER1 => +{
+        link     => '/chapter1',
+        SECTION1 => +{
+            link        => '/chapter1/section1',
+            SUBSECTION1 => +{ link => '/chapter1/section1/subsection1', },
+            SUBSECTION2 => +{ link => '/chapter1/section1/subsection2', },
+            SUBSECTION3 => +{ link => '/chapter1/section1/subsection3', },
+        },
+        SECTION2 => +{
+            link        => '/chapter1/section2',
+            SUBSECTION1 => +{ link => '/chapter1/section2/subsection1', },
+            SUBSECTION2 => +{ link => '/chapter1/section2/subsection2', },
+            SUBSECTION3 => +{ link => '/chapter1/section2/subsection3', },
+        },
+        SECTION3 => +{
+            link        => '/chapter1/section3',
+            SUBSECTION1 => +{ link => '/chapter1/section3/subsection1', },
+            SUBSECTION2 => +{ link => '/chapter1/section3/subsection2', },
+            SUBSECTION3 => +{ link => '/chapter1/section3/subsection3', },
+        },
+    },
+};
+
+my $menu_bar = +{};
+for my $dir ( @{$chapter_dirs} ) {
+    my $chapter_key  = uc basename($dir);
+    my $chapter_link = '/' . basename($dir);
+    $menu_bar->{$chapter_key} = +{ link => $chapter_link, };
+
+    for my $section_dir ( @{$section_dirs} ) {
+        my $section_key  = uc basename($section_dir);
+        my $section_link = $chapter_link . '/' . basename($section_dir);
+        $menu_bar->{$chapter_key}->{$section_key}
+            = +{ link => $section_link, };
+
+        for my $subsection_dir ( @{$subsection_dirs} ) {
+            my $subsection_key = uc basename($subsection_dir);
+            my $subsection_link
+                = $section_link . '/' . basename($subsection_dir);
+            $menu_bar->{$chapter_key}->{$section_key}->{$subsection_key}
+                = +{ link => $subsection_link, };
+        }
+    }
+}
+
+warn Dumper $menu_bar;
+
+create_readme_top( $project, basename($project), $menu_bar, );
+
+sub create_dir {
+    my ( $dir, $title, $numbers, ) = @_;
+    my $dirs = [];
+    for my $i ( @{$numbers} ) {
+        my $create_dir = "$title$i";
+        my $mk_dir     = "$dir/$create_dir";
+        mkdir $mk_dir;
+        push @{$dirs}, $mk_dir;
+    }
+    return $dirs;
+}
+
+sub create_readme_top {
+    my ( $dir, $title, $menu_bar ) = @_;
+    my $file = "$dir/README.md";
+    my $text = write_topreadme( $title, $menu_bar, );
+    my $fh   = IO::File->new("> $file");
+    if ( defined $fh ) {
+        print $fh $text;
+        $fh->close;
+    }
+    return;
+}
+
+# readme ファイル作成
+sub create_readme {
+    my ( $dir, $title, $sub_titles ) = @_;
+    my $file = "$dir/README.md";
+    my $text = write_readme( $title, $sub_titles, );
+    my $fh   = IO::File->new("> $file");
+    if ( defined $fh ) {
+        print $fh $text;
+        $fh->close;
+    }
+    return;
+}
+
+sub write_topreadme {
+    my $title    = shift;
+    my $menu_bar = shift;
+    my $readme   = <<"__END1__";
+# NAME
+
+$title -
+
+# INTRODUCTION
+
+```
+```
+
+# MENU
+
+__END1__
+
+    for my $key ( sort( keys %{$menu_bar} ) ) {
+        my $chapter     = $key;
+        my $chapterlink = $menu_bar->{$key}->{link};
+
+        $readme .= <<"__END2__";
+- [$chapter]($chapterlink):
+__END2__
+        for my $skey ( sort( keys %{ $menu_bar->{$key} } ) ) {
+            next if $skey eq 'link';
+            my $section     = $skey;
+            my $sectionlink = $menu_bar->{$key}->{$skey}->{link};
+            $readme .= <<"__END21__";
+  - [$section]($sectionlink):
+__END21__
+
+            for my $sukey ( sort( keys %{ $menu_bar->{$key}->{$skey} } ) ) {
+                next if $sukey eq 'link';
+                my $subsection = $sukey;
+                my $subsectionlink
+                    = $menu_bar->{$key}->{$skey}->{$sukey}->{link};
+                $readme .= <<"__END22__";
+    - [$subsection]($subsectionlink):
+__END22__
+
+            }
+
+        }
+
+    }
+
+    $readme .= <<"__END3__";
+
+# SUMMARY
+
+# SEE ALSO
+__END3__
+    return $readme;
+}
+
+# readme ファイルの文面作成
+sub write_readme {
+    my $title      = shift;
+    my $sub_titles = shift;
+    my $readme     = <<"__END1__";
+# NAME
+
+$title -
+
+```
+```
+
+__END1__
+
+    for my $sub_title ( @{$sub_titles} ) {
+        $readme .= <<"__END2__";
+## $sub_title
+
+__END2__
+    }
+
+    $readme .= <<"__END3__";
+# SUMMARY
+
+# SEE ALSO
+
+- [/README.md](/README.md) -
+
+__END3__
+    return $readme;
+}

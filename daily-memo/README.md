@@ -49,7 +49,7 @@ ln -s /Users/yk/github/bokko/daily-memo/dailymemo.py dailymemo
 ## EXAMPLES
 
 ```bash
-# 標準出力へ年始から年末まで出力)
+# 標準出力へ年始から年末まで出力
 dailymemo
 
 # 指定したファイルに書き出し

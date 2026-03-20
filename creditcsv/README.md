@@ -1,5 +1,56 @@
 # credit-csv
 
+creditcsv - クレジットカード会社が提供しているcsvファイルを成形
+
+## SYNOPSIS
+
+```bash
+creditcsv [--type=<name>] [--json] [file ...]
+```
+
+## DESCRIPTION
+
+```text
+最近はクレジットカード各社が利用履歴をwebサイト確認できようになり
+csv形式のテキストファイルのダウンロードを提供してくれるようになった
+
+しかし、各社ダウンロードファイルの文字コードが統一されていなかったり
+行と列の形式ではなかったりと使い勝手が悪い
+
+利用履歴でデータを収集したいモチベーションは履歴データをもとに
+絞り込み検索などを使いたいため、行と列の形式に置き換え DB に取り込めるようにしたい
+
+2025年9月
+```
+
+## OPTIONS
+
+```text
+--type=<name> or -t=<name>
+    整形したいcsv形式ファイルを提供している、クレジットカード会社を指定
+    "kv" 九州カードvisa, "rv" 楽天カードvisa
+    入力例は EXAMPLES を参照ください
+
+--json or -j
+    json 形式で出力します
+```
+
+## EXAMPLES
+
+```text
+creditcsv --type="kv" 202506.csv
+    標準出力へ、文字コードはutf8、行の形式に成形
+
+creditcsv 202506.csv
+    type を省略した場合は kv が選択
+
+creditcsv --type="kv" 202506.csv > 202506_after.csv
+    指定したファイルに書き出し
+
+creditcsv --type="kv" --json 202506.csv
+    json 形式で出力
+```
+
 作成予定memo
 
 - クレジットカード利用履歴のデータベース化
@@ -37,4 +88,9 @@ source .venv/bin/activate
 
 # (実行)
 (venv) % ./credit_csv.py
+
+# venv 環境が構築されていれば下記でも実行可能
+.venv/bin/python3 credit_csv.py
+
+.venv/bin/python3 -m unittest
 ```
